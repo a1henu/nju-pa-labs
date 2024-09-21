@@ -31,7 +31,7 @@ override ARGS += $(ARGS_DIFF)
 IMG ?=
 NEMU_EXEC := $(BINARY) $(ARGS) $(IMG)
 
-run-env: #$(BINARY) $(DIFF_REF_SO)
+run-env: $(BINARY) $(DIFF_REF_SO)
 
 run: run-env
 	@echo $(NEMU_EXEC)

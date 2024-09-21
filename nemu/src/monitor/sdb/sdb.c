@@ -17,6 +17,7 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <utils.h>
 #include "sdb.h"
 
 static int is_batch_mode = false;
@@ -49,6 +50,7 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
+  nemu_state.state = NEMU_QUIT;
   return -1;
 }
 
@@ -64,6 +66,12 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* TODO: Add more commands */
+  {"si", "Step one instruction exactly", cmd_si},
+  {"info", "print register status and watchpoint information", cmd_info},
+  {"x", "Examine memory: x/FMT ADDRESS", cmd_x},
+  // {"p", "Print value of expression EXPR", cmd_p},
+  // {"w", "Set a watchpoint for an expression", cmd_w},
+  // {"d", "Delete watchpoint", cmd_d},
 
 };
 
