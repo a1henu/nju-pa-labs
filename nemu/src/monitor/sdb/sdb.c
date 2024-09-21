@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <common.h>
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -24,6 +25,8 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+
+word_t paddr_read(paddr_t addr, int len);
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -56,6 +59,52 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int cmd_si(char *args) {
+  int step = 0;
+  if (args == NULL) {
+    step = 1;
+  } else {
+    sscanf(args, "%d", &step);
+  }
+  cpu_exec(step);
+  return 0;
+}
+
+static int cmd_info(char *args) {
+  if (args == NULL) {
+    printf("no argument given!\nplease input 'info r' or 'info w'\n");
+    printf("info r: print register status\n");
+    printf("info w: print watchpoint information\n");
+  } else if (strcmp(args, "r") == 0) {
+    isa_reg_display();
+  } else if (strcmp(args, "w") == 0) {
+    printf("watchpoint info function not implemented yet\n");
+  } else {
+    printf("Unknown argument '%s'\n", args);
+  }
+  return 0;
+}
+
+static int cmd_x(char *args) {
+  if (args == NULL) {
+    printf("no argument given!\nplease input 'x N EXPR'\n");
+  } else {
+    char *n       = strtok(args, " ");
+    char *expr    = strtok(NULL, " ");
+    int step      = 0;
+    paddr_t addr  = 0;
+
+    sscanf(n, "%d", &step);
+    sscanf(expr, "%x", &addr);
+
+    for (int i = 0; i < step; ++i) {
+      printf("%x\n", paddr_read(addr, 4));
+      addr += 4;
+    }
+  }
+  return 0;
+}
+
 static struct {
   const char *name;
   const char *description;
@@ -68,7 +117,7 @@ static struct {
   /* TODO: Add more commands */
   {"si", "Step one instruction exactly", cmd_si},
   {"info", "print register status and watchpoint information", cmd_info},
-  {"x", "Examine memory: x/FMT ADDRESS", cmd_x},
+  {"x", "Examine memory: x N EXPR", cmd_x},
   // {"p", "Print value of expression EXPR", cmd_p},
   // {"w", "Set a watchpoint for an expression", cmd_w},
   // {"d", "Delete watchpoint", cmd_d},
